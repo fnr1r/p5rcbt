@@ -2,14 +2,14 @@ use std::ffi::CStr;
 use skyline::hooks::InlineCtx;
 
 
-mod fuse;
 mod criware;
-mod utils;
+//mod fuse;
+//mod utils;
 
 #[macro_export]
 macro_rules! reg_x {
     ($ctx:ident, $no:expr) => {
-        unsafe { *$ctx.registers[$no].x.as_ref() }
+        *$ctx.registers[$no].x.as_ref()
     };
 }
 
@@ -33,6 +33,7 @@ pub fn mount_directories(_: &InlineCtx) {
 }
 
 // Old offset: 0x130a930
+#[allow(clippy::missing_transmute_annotations)]
 #[skyline::hook(offset = 0x130ab30)]
 pub fn load_file_hook(unk1: *const u8, binder: *const u8, filepath: *const u8, offset: u64, filesize: u64) -> i32 {
     let filename = unsafe { CStr::from_ptr(filepath as _) };
