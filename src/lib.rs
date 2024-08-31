@@ -1,5 +1,5 @@
 use skyline::hooks::InlineCtx;
-use std::ffi::CStr;
+use std::{ffi::CStr, panic::PanicInfo as PanicHookInfo};
 
 mod criware;
 //mod fuse;
@@ -61,19 +61,23 @@ pub fn is_platform_pc() -> bool {
     true
 }
 
+fn stringify_panic_hook_info(info: &PanicHookInfo<'_>) -> String {
+    if let Some(displayable) = info.payload().downcast_ref::<&dyn std::fmt::Display>() {
+        displayable.to_string()
+    } else if let Some(debuggable) = info.payload().downcast_ref::<&dyn std::fmt::Debug>() {
+        format!("{:?}", debuggable)
+    } else {
+        "&PanicHookInfo<'_> (downcasting failed)".into()
+    }
+}
+
 #[skyline::main(name = "cpk")]
 pub fn main() {
     // Install a panic handler to display a native error popup on Switch
     std::panic::set_hook(Box::new(|info| {
         let location = info.location().unwrap();
 
-        let msg = match info.payload().downcast_ref::<&'static str>() {
-            Some(s) => *s,
-            None => match info.payload().downcast_ref::<String>() {
-                Some(s) => &s[..],
-                None => "Box<Any>",
-            },
-        };
+        let msg = stringify_panic_hook_info(info);
 
         let err_msg = format!("thread has panicked at '{}', {}", msg, location);
         skyline::error::show_error(
