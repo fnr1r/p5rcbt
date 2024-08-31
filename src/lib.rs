@@ -27,7 +27,7 @@ pub fn mount_directories(_: &InlineCtx) {
     // fuse::mods::install_mods_vfs();
 
     // criware::bind::bind_directory(binder_hn, "mods:/").unwrap();
-    criware::bind::bind_directory(binder_hn, "sd:/p5r").unwrap();
+    criware::bind::bind_directory(binder_hn, "sd:/mods/Persona 5 Royal").unwrap();
     criware::bind::bind_directory(binder_hn, "app0:/CPK/BIND").unwrap();
 }
 
