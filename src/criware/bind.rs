@@ -1,5 +1,5 @@
-use thiserror::Error;
 use camino::{Utf8Path, Utf8PathBuf};
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum DirBindingError {
@@ -16,9 +16,19 @@ pub fn get_binder_handle() -> CriFnBinderHandle;
 
 // Old offset: 0x1302710
 #[skyline::from_offset(0x1302910)]
-pub fn crifsbinder_bind_directory(binder: CriFnBinderHandle, src_binder: *const u8, path: *const u8, work: *const u8, work_size: i32, bind_id: &mut u32) -> i32;
+pub fn crifsbinder_bind_directory(
+    binder: CriFnBinderHandle,
+    src_binder: *const u8,
+    path: *const u8,
+    work: *const u8,
+    work_size: i32,
+    bind_id: &mut u32,
+) -> i32;
 
-pub fn bind_directory<P: AsRef<Utf8Path>>(binder_handle: CriFnBinderHandle, path: P) -> Result<u32, DirBindingError> {
+pub fn bind_directory<P: AsRef<Utf8Path>>(
+    binder_handle: CriFnBinderHandle,
+    path: P,
+) -> Result<u32, DirBindingError> {
     let path = path.as_ref();
 
     // nn::fs::CheckMountName?
@@ -31,7 +41,16 @@ pub fn bind_directory<P: AsRef<Utf8Path>>(binder_handle: CriFnBinderHandle, path
         let bind_path = skyline::c_str(&nullterm_path);
         let mut out_bind_id = 0;
 
-        let result = unsafe { crifsbinder_bind_directory(binder_handle, 0 as _, bind_path, 0 as _, 0, &mut out_bind_id) };
+        let result = unsafe {
+            crifsbinder_bind_directory(
+                binder_handle,
+                0 as _,
+                bind_path,
+                0 as _,
+                0,
+                &mut out_bind_id,
+            )
+        };
 
         if result != 0 {
             Err(DirBindingError::CriwareErrorCode(result))

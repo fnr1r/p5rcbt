@@ -1,6 +1,5 @@
-use std::ffi::CStr;
 use skyline::hooks::InlineCtx;
-
+use std::ffi::CStr;
 
 mod criware;
 //mod fuse;
@@ -35,9 +34,15 @@ pub fn mount_directories(_: &InlineCtx) {
 // Old offset: 0x130a930
 #[allow(clippy::missing_transmute_annotations)]
 #[skyline::hook(offset = 0x130ab30)]
-pub fn load_file_hook(unk1: *const u8, binder: *const u8, filepath: *const u8, offset: u64, filesize: u64) -> i32 {
+pub fn load_file_hook(
+    unk1: *const u8,
+    binder: *const u8,
+    filepath: *const u8,
+    offset: u64,
+    filesize: u64,
+) -> i32 {
     let filename = unsafe { CStr::from_ptr(filepath as _) };
-    
+
     println!("Filepath: {}", filename.to_str().unwrap());
 
     call_original!(unk1, binder, filepath, offset, filesize)
@@ -64,11 +69,9 @@ pub fn main() {
 
         let msg = match info.payload().downcast_ref::<&'static str>() {
             Some(s) => *s,
-            None => {
-                match info.payload().downcast_ref::<String>() {
-                    Some(s) => &s[..],
-                    None => "Box<Any>",
-                }
+            None => match info.payload().downcast_ref::<String>() {
+                Some(s) => &s[..],
+                None => "Box<Any>",
             },
         };
 
@@ -80,5 +83,10 @@ pub fn main() {
         );
     }));
 
-    skyline::install_hooks!(sixty_fps_hook, print_criware_error, load_file_hook, mount_directories);
+    skyline::install_hooks!(
+        sixty_fps_hook,
+        print_criware_error,
+        load_file_hook,
+        mount_directories
+    );
 }
