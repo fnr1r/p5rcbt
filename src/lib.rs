@@ -87,6 +87,7 @@ pub fn main() {
         sixty_fps_hook,
         print_criware_error,
         load_file_hook,
-        mount_directories
+        mount_directories,
+        is_platform_pc
     );
 }
